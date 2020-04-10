@@ -1,0 +1,186 @@
+<html>
+
+    <meta charset="utf-8">
+
+    <!-- Load d3.js -->
+    <script src="https://d3js.org/d3.v4.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+    <script src="https://code.highcharts.com/maps/highmaps.js"></script>
+    <script src="https://code.highcharts.com/maps/modules/data.js"></script>
+    <script src="https://code.highcharts.com/maps/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/maps/modules/offline-exporting.js"></script>
+    <script src="https://code.highcharts.com/mapdata/custom/world.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+    <!-- Flag sprites service provided by Martijn Lafeber, https://github.com/lafeber/world-flags-sprite/blob/master/LICENSE -->
+    <link rel="stylesheet" type="text/css" href="//github.com/downloads/lafeber/world-flags-sprite/flags32.css" />
+
+
+    <style>
+        /* Add some padding on document's body to prevent the content
+        to go underneath the header and footer */
+        body{        
+            padding-top: 60px;
+            padding-bottom: 40px;
+        }
+        .fixed-header, .fixed-footer{
+            width: 100%;
+            position: fixed;        
+            background: #333;
+            padding: 10px 0;
+            color: #fff;
+        }
+        .fixed-header{
+            top: 0;
+        }
+        .fixed-footer{
+            bottom: 0;
+        }
+        .container{
+            width: 80%;
+            margin: 0 auto; /* Center the DIV horizontally */
+        }
+        nav a{
+            color: #fff;
+            text-decoration: none;
+            padding: 7px 25px;
+            display: inline-block;
+        }
+    </style>
+    </head>
+    <body>
+        <div class="fixed-header">
+            <div class>
+                <nav>
+                    <a href="/"><span style="font-size: 40px;">COVID-19 DashBoard</span></a>
+                    
+                </nav>
+            </div>
+        </div>
+        <div>
+            <div class="col-lg-3" style="float: left;  max-height: 650px;max-width:400px;overflow: scroll; overflow-x:hidden;">
+                <div style="background-color: rgb(41, 41, 40);">
+                    
+                    <span style="color: rgb(255, 255, 255); text-align: center;"><h2>Total Infected: {{overallCount}}</h2></span>
+                </div>
+                <div class="col-lg-12">
+                    <form method="post" enctype="multipart/form-data" action="selectCountry">
+                    {% csrf_token %}
+                    <div class="col-lg-4" style="float: left;">
+                        {% for con in contryNames %}
+                        <table style="border-width: 2px; border: #333;">
+                        <tr>
+                            <input type="submit" value={{con}} name="countryName" style="width:100px;">
+                        </tr>
+                    </table>
+                        {% endfor %}
+                    </div>
+                    <div style="float: left;"> 
+                        <canvas id="myChart" style="height: 6650px; width: 280px;"></canvas>
+                    </div>
+                    </form>
+                    
+
+                </div>
+            </div>
+            <div class="col-lg-6" style="float: left;">
+                <br>
+                <br> 
+                <h2 style="text-align: center;">Analysis on {{countryName}}</h2><br>
+                    <canvas id="lineChart" style="height: 450px;"></canvas>
+            </div>
+            <div class="col-lg-3" style="float: left;max-width: 300px;  max-height: 650px;overflow: scroll; overflow-x:hidden;">
+                
+            </div>
+            </div>
+
+        </div>
+        <br>
+        
+            
+    </body>
+
+<script>
+
+    var ctx = document.getElementById('myChart').getContext('2d');
+    var chartOptions = {
+                            legend: {
+                                display: false
+                                    },
+                            scales: {
+                                xAxes: [{
+                                    barPercentage:1
+                                    }],
+                                yAxes: [
+                                        // {barPercentage: 1},
+                                        // {gridLines:{drawBorder: false}},
+                                        {ticks: {display:false}},
+                                        // {ticks: {mirror: true}},
+                                        {display: false},
+                                        
+                                        ],
+                            elements: {
+                                rectangle: {
+                                borderSkipped: 'left',
+                                }
+                            }
+                            }
+                        };
+    var chart = new Chart(ctx, {
+        // The type of chart we want to create
+        type: 'horizontalBar',
+
+        // The data for our dataset
+        data: {
+            labels: {{ contryNames|safe }},
+            datasets: [{
+                data: {{ countsVal|safe }},
+                label: 'Infected Counts',
+                barThickness:'flex',
+                backgroundColor:'#03a9fc',  
+                
+            }]
+        },
+
+        
+
+        // Configuration options go here
+        options: chartOptions
+});
+</script>
+
+<script>
+    var data2={{datasetsForLine|safe}};
+    var chartOptions2 = {
+            legend: {
+                display: true
+                    },
+                    scales: {
+						yAxes: [{
+							type: 'linear', // only linear but allow scale type registration. This allows extensions to exist solely for log scale for instance
+							display: true,
+							position: 'left',
+							id: 'y-axis-1',
+						}, {
+							type: 'linear', // only linear but allow scale type registration. This allows extensions to exist solely for log scale for instance
+							display: true,
+							position: 'right',
+							id: 'y-axis-2',
+
+							// grid line settings
+							gridLines: {
+								drawOnChartArea: false, // only want the grid lines for one axis to show up
+							},
+						}],
+					},
+        };
+    var ctx2 = document.getElementById('lineChart').getContext('2d');  
+	var myLineChart = new Chart(ctx2, {
+        type: 'line',
+        data: {labels:{{axisvalues|safe}},datasets:data2,},
+        options: chartOptions2
+        });
+</script>
+
+</html>
