@@ -1,0 +1,282 @@
+<html>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+<script src="https://code.highcharts.com/maps/highmaps.js"></script>
+<script src="https://code.highcharts.com/maps/modules/data.js"></script>
+<script src="https://code.highcharts.com/maps/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/maps/modules/offline-exporting.js"></script>
+<script src="https://code.highcharts.com/mapdata/custom/world.js"></script>
+
+<link rel="stylesheet" type="text/css" href="//github.com/downloads/lafeber/world-flags-sprite/flags32.css" />
+
+<style>
+    /* Add some padding on document's body to prevent the content
+    to go underneath the header and footer */
+    body {
+        padding-top: 60px;
+        padding-bottom: 40px;
+    }
+
+    .fixed-header,
+    .fixed-footer {
+        width: 100%;
+        position: fixed;
+        background: #333;
+        padding: 10px 0;
+        color: #fff;
+    }
+
+    .fixed-header {
+        top: 0;
+    }
+
+    .fixed-footer {
+        bottom: 0;
+    }
+
+    .container {
+        width: 80%;
+        margin: 0 auto;
+        /* Center the DIV horizontally */
+    }
+
+    nav a {
+        color: #fff;
+        text-decoration: none;
+        padding: 7px 25px;
+        display: inline-block;
+    }
+</style>
+
+<body>
+    <div class="fixed-header">
+        <div class>
+            <nav>
+                <a href="/"><span style="font-size: 30px;">COVID-19 DashBoard</span></a>
+                <div id="p1" style="text-align: left;"></div>
+                <script>
+                    var today = new Date();
+                    var dd = String(today.getDate()).padStart(2, '0');
+                    var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+                    var yyyy = today.getFullYear();
+                    today = mm + '/' + dd + '/' + yyyy;
+                    document.getElementById("p1").innerHTML = "&nbsp; &nbsp; &nbsp; &nbsp; Last updated on " + today
+
+                </script>
+                <div style="text-align: right;">DashBoard created by: Kulbhushan Sharma &nbsp; &nbsp;&nbsp; &nbsp;
+                </div>
+
+            </nav>
+        </div>
+    </div>
+
+
+    <div class="col-lg-3" style="float: left; max-height:650px;max-width:350px;overflow: scroll; overflow-x: hidden;">
+        <br>
+        <h2>Total Confirmed - {{overallCount}}</h2>
+        <div class="col-lg-12" style="float: left;">
+            <div class="col-lg-4" style="float: left;">
+                {% for con in countryNames %}
+                <input type="submit" value="{{con}}" name="countryNames" style="width: 130px;"><br>
+                {% endfor %}
+            </div>
+
+            <div class="col-lg-8" style="float: left;">
+                <canvas id="confirmed_chart" style="width: 180px; height:4100px;  "></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6" style="float: left;">
+        <br>
+        <br>
+        <div id="mapChart" style="height: 850px; width: 900px;"></div>
+    </div>
+    <div class="col-lg-3" style="float: right; max-height:650px;max-width:350px;overflow: scroll; overflow-x: hidden;">
+        <br>
+        <h2> Total Death - {{overalldeathCount}}</h2>
+        <div class="col-lg-12" style="float: left;">
+            <div class="col-lg-4" style="float: left;">
+                {% for con in countryNames %}
+                <input type="submit" value="{{con}}" name="countryNames" style="width: 130px;"><br>
+                {% endfor %}
+            </div>
+
+            <div class="col-lg-8" style="float: left;">
+                <canvas id="death_chart" style="width: 180px; height:4100px;  "></canvas>
+            </div>
+        </div>
+    </div>
+
+
+</body>
+
+<script>
+    var ctx = document.getElementById('confirmed_chart').getContext('2d');
+    var chartOptions = {
+        legend: {
+            display: false
+        },
+        scales: {
+            xAxes: [{
+                barPercentage: 1
+            }],
+            yAxes: [
+                // {barPercentage: 1},
+                // {gridLines:{drawBorder: false}},
+                { ticks: { display: false } },
+                // {ticks: {mirror: true}},
+                { display: false },
+
+            ],
+            elements: {
+                rectangle: {
+                    borderSkipped: 'left',
+                }
+            }
+        }
+    };
+    var chart = new Chart(ctx, {
+        // The type of chart we want to create
+        type: 'horizontalBar',
+
+        // The data for our dataset
+        data: {
+            labels: {{ countryNames | safe }},
+    datasets: [{
+        label: 'Latest Infected Counts',
+        backgroundColor: 'rgb(124, 181, 236)',
+        borderColor: 'rgb(255, 99, 132)',
+        data: {{ countsVal | safe }}
+    }]
+        },
+
+    // Configuration options go here
+    options: chartOptions
+    });
+
+</script>
+
+<script>
+    var ctx = document.getElementById('death_chart').getContext('2d');
+    var chartOptions = {
+        legend: {
+            display: false
+        },
+        scales: {
+            xAxes: [{
+                barPercentage: 1
+            }],
+            yAxes: [
+                // {barPercentage: 1},
+                // {gridLines:{drawBorder: false}},
+                { ticks: { display: false } },
+                // {ticks: {mirror: true}},
+                { display: false },
+
+            ],
+            elements: {
+                rectangle: {
+                    borderSkipped: 'left',
+                }
+            }
+        }
+    };
+    var chart = new Chart(ctx, {
+        // The type of chart we want to create
+        type: 'horizontalBar',
+
+        // The data for our dataset
+        data: {
+            labels: {{ countryNames | safe }},
+    datasets: [{
+        label: 'Death Counts',
+        backgroundColor: 'rgb(255, 99, 132)',
+        borderColor: 'rgb(255, 99, 132)',
+        data: {{ deathcountsVal | safe }}
+    }]
+        },
+
+    // Configuration options go here
+    options: chartOptions
+    });
+
+</script>
+
+<script>
+    var data2 = {{ dataForMap | safe}};
+
+    // Highcharts.getJSON('/static/firstUI/world-population-density.json', function (data) {
+    Highcharts.getJSON('https://cdn.jsdelivr.net/gh/highcharts/highcharts@v7.0.0/samples/data/world-population-density.json', function (data) {
+        // Prevent logarithmic errors in color calulcation
+        data.forEach(function (p) {
+            p.value = (p.value < 1 ? 1 : p.value);
+        });
+
+        // Initiate the chart
+        Highcharts.mapChart('mapChart', {
+
+            chart: {
+                map: 'custom/world'
+            },
+
+            title: {
+                text: 'Cronavirus Cases Worldwide'
+            },
+
+            legend: {
+                title: {
+                    text: 'Infected cases',
+                    style: {
+                        color: ( // theme
+                            Highcharts.defaultOptions &&
+                            Highcharts.defaultOptions.legend &&
+                            Highcharts.defaultOptions.legend.title &&
+                            Highcharts.defaultOptions.legend.title.style &&
+                            Highcharts.defaultOptions.legend.title.style.color
+                        ) || 'black'
+                    }
+                }
+            },
+
+            mapNavigation: {
+                enabled: true,
+                buttonOptions: {
+                    verticalAlign: 'bottom'
+                }
+            },
+
+            tooltip: {
+                backgroundColor: 'none',
+                borderWidth: 0,
+                shadow: false,
+                useHTML: true,
+                padding: 0,
+                pointFormat: '<span class="f32"><span class="flag {point.properties.hc-key}">' +
+                    '</span></span> {point.name}<br>' +
+                    '<span style="font-size:30px">{point.value}</span>',
+                positioner: function () {
+                    return { x: 0, y: 250 };
+                }
+            },
+
+            colorAxis: {
+                min: 1,
+                max: 1000,
+                type: 'logarithmic'
+            },
+
+            series: [{
+                data: data2,
+                joinBy: ['iso-a3', 'code3'],
+                name: 'Infected Population',
+                states: {
+                    hover: {
+                        color: '#a4edba'
+                    }
+                }
+            }]
+        });
+    });
+
+</script>
+
+</html>
