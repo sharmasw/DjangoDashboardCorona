@@ -1,8 +1,8 @@
 # DjangoDashboardCorona
-Dashboard made in dajngo application
+Dashboard made in django application
 
 
-ALl helpfull websites
+All helpfull websites
 
 https://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/maps/demo/tooltip/
 
